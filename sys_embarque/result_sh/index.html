@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrôle PWM</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input[type="number"] {
+            width: 60px;
+            text-align: center;
+            font-size: 1rem;
+        }
+        button {
+            margin-left: 10px;
+            padding: 5px 15px;
+            font-size: 1rem;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contrôle PWM</h1>
+
+    <!-- Input pour contrôler le PWM -->
+    <label for="pwmInput">Entrez la valeur PWM :</label>
+    <input type="number" id="pwmInput" min="0" max="100" value="0" />
+    <button id="sendPwm">Envoyer</button>
+    <p id="pwmValueDisplay">Valeur PWM actuelle : 0</p>
+
+    <p id="status"></p>
+
+    <script>
+        const socket = io();
+
+        // Bouton pour envoyer la valeur PWM
+        document.getElementById('sendPwm').addEventListener('click', () => {
+            const pwmValue = document.getElementById('pwmInput').value;
+
+            // Validation pour s'assurer que la valeur est entre 0 et 100
+            if (pwmValue < 0 || pwmValue > 100 || isNaN(pwmValue)) {
+                document.getElementById('status').textContent = "Valeur invalide. Entrez un nombre entre 0 et 100.";
+                document.getElementById('status').style.color = "red";
+                return;
+            }
+
+            // Affichage de la valeur PWM et envoi au serveur
+            document.getElementById('pwmValueDisplay').textContent = `Valeur PWM actuelle : ${pwmValue}`;
+            socket.emit('update-pwm', pwmValue);
+        });
+
+        // Affichage du statut
+        socket.on('success', (message) => {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').style.color = "green";
+        });
+
+        socket.on('error', (message) => {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').style.color = "red";
+        });
+    </script>
+</body>
+</html>

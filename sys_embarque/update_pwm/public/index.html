@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrôle PWM</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #pwmGauge {
+            width: 80%;
+            margin: 20px;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Contrôle PWM</h1>
+
+    <!-- Slider de type "gauge" pour contrôler la valeur PWM -->
+    <label for="pwmGauge">Réglez la valeur PWM :</label>
+    <input type="range" id="pwmGauge" min="0" max="100" value="0" step="1" />
+    <p id="pwmValueDisplay">Valeur PWM : 0</p>
+    <p id="status"></p>
+
+    <script>
+        const socket = io();
+
+        // Met à jour la valeur affichée du PWM
+        document.getElementById('pwmGauge').addEventListener('input', (event) => {
+            const pwmValue = event.target.value;
+            document.getElementById('pwmValueDisplay').textContent = `Valeur PWM : ${pwmValue}`;
+
+            // Envoie de la valeur PWM au serveur via Socket.IO
+            socket.emit('update-pwm', pwmValue);
+        });
+
+        // Répondre avec un message de succès
+        socket.on('success', (message) => {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = 'success';
+        });
+
+        // Répondre avec un message d'erreur
+        socket.on('error', (message) => {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = 'error';
+        });
+    </script>
+</body>
+</html>
+
